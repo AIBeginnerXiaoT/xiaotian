@@ -1,0 +1,196 @@
+import os
+os.system('cls' if os.name=='nt' else 'clear')
+
+from appium.webdriver.common.touch_action import TouchAction
+from appium.webdriver.common.multi_action import MultiAction
+from appium.webdriver.common.mobileby import MobileBy
+from appium.webdriver.extensions.android.nativekey import AndroidKey
+from appium import webdriver
+# import evaluate
+import time
+from PIL import Image
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from chaojiying import Chaojiying_Client
+
+# 腾讯动漫
+caps1 = {
+    "platformName": "Android",
+    "platformVersion": "11",
+    "deviceName": "Lty",    #设备名，安卓手机可以随意填写
+    "appPackage": "com.qq.ac.android", #启动 APP Package 名称
+    "appActivity": ".splash.SplashActivity",#启动 Activity 名称
+    'unicodeKeyboard': True, # 使用自带输入法，输入中文时填True
+    'resetKeyboard': True, # 执行完程序恢复原来输入法
+    "noReset": True,    #不要重置 App
+    'newCommandTimeout': 6000,
+    "automationName": "UiAutomator2",
+    "allowInvisibleElements": True
+}
+
+# 微信 wps签到桌面版
+caps2 = {
+    "platformName": "Android",
+    "platformVersion": "11",
+    "deviceName": "Lty",    
+    "appPackage": "com.tencent.mm", 
+    "appActivity": ".ui.LauncherUI",
+    'unicodeKeyboard': True, 
+    'resetKeyboard': True, 
+    "noReset": True,    
+    'newCommandTimeout': 6000,
+    "automationName": "UiAutomator2",
+    "allowInvisibleElements": True
+}
+"""
+{
+  "platformName": "Android",
+  "platformVersion": "11",
+  "deviceName": "Lty",
+  "appPackage": "com.tencent.mm",
+  "appActivity": ".ui.LauncherUI",
+  "unicodeKeyboard": true,
+  "resetKeyboard": true,
+  "noReset": true,
+  "automationName": "UiAutomator2",
+  "allowInvisibleElements": true
+}
+"""
+
+
+# blibli
+caps3 = {
+    "platformName": "Android",
+    "platformVersion": "12",
+    "deviceName": "Lty",    #设备名，安卓手机可以随意填写
+    "appPackage": "tv.danmaku.bili", #启动 APP Package 名称
+    "appActivity": ".MainActivityV2",#启动 Activity 名称
+    'unicodeKeyboard': False, # 使用自带输入法，输入中文时填True
+    'resetKeyboard': True, # 执行完程序恢复原来输入法
+    "noReset": True,    #不要重置 App
+    'newCommandTimeout': 6000,
+    "automationName": "UiAutomator2",
+    "allowInvisibleElements": True
+}
+
+def get_screenshot(driver):
+    screenshot = driver.get_screenshot_as_png()
+    with open('./appium/1.png', 'wb') as f:
+        f.write(screenshot)
+    left = 164
+    top = 1003
+    right = 1004
+    bottom = 1188
+    photo = Image.open('./appium/1.png')
+    photo = photo.crop((left, top, right, bottom))
+    photo.save('./appium/2.gif')
+    photo = Image.open('./appium/2.gif') 
+    photo = photo.resize((400, 88))
+    photo.save('./appium/3.gif')
+    print("验证码保存成功！")
+
+
+def login_tencent():
+    driver = webdriver.Remote("http://localhost:4723/wd/hub", caps1)
+
+    # 设置缺省等待时间
+    driver.implicitly_wait(10)
+
+    # 关闭广告
+    ele = driver.find_element(by = MobileBy.ID,value = "splash_container")
+    if  ele:
+        TouchAction(driver).tap(x=1258, y=264).perform()
+        # print("广告已关闭！")
+
+    try:
+        # 点击“我知道了”
+        ele = driver.find_element(by = MobileBy.ID,value = "com.qq.ac.android:id/sure_btn")
+        if  ele:
+            ele.click()
+    except: pass
+    
+    ele = driver.find_element(by = MobileBy.ID,value = "pic")
+    if  ele:
+        # 第一条语句
+        TouchAction(driver).tap(x=1292, y=2763).perform()
+        time.sleep(1)
+        # 第二条语句
+        sign_ele = driver.find_element(by = MobileBy.ID,value = "com.qq.ac.android:id/title_size_two_line")
+        sign_num = int(sign_ele.text)
+        # print('已签到：',sign_num)
+        if sign_num == 0:
+            TouchAction(driver).tap(x=352, y=1527).perform()
+        elif sign_num == 1:
+            TouchAction(driver).tap(x=598, y=1536).perform()
+        elif sign_num == 2:
+            TouchAction(driver).tap(x=830, y=1522).perform()
+        elif sign_num == 3:
+            TouchAction(driver).tap(x=1072, y=1527).perform()
+        elif sign_num == 4:
+            TouchAction(driver).tap(x=463, y=1927).perform()
+        elif sign_num == 5:
+            TouchAction(driver).tap(x=712, y=1927).perform()
+        elif sign_num == 6:
+            TouchAction(driver).tap(x=964, y=1927).perform()
+    # 关闭 driver
+    driver.quit()
+
+def login_wps_vip():
+    driver = webdriver.Remote("http://localhost:4723/wd/hub", caps2)
+    # 设置缺省等待时间
+    driver.implicitly_wait(10)
+    ele = driver.find_element(by=MobileBy.ANDROID_UIAUTOMATOR, value='new UiSelector().text("WPS超级会员")')
+    if  ele:
+        ele.click()
+    time.sleep(1)
+    # 点击 火全新会员
+    driver.find_element(by=MobileBy.XPATH, value='/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.RelativeLayout/android.widget.LinearLayout/android.widget.FrameLayout[2]/android.widget.LinearLayout/android.widget.LinearLayout/android.widget.LinearLayout[2]/android.widget.FrameLayout[2]/android.widget.LinearLayout/android.widget.TextView').click()
+    time.sleep(2)
+    # 点击 打卡免费领会员权益
+    TouchAction(driver).tap(x=550, y=2045).perform()
+    time.sleep(3)
+    # 关闭 x
+    try:
+        TouchAction(driver).tap(719,2467).perform()
+    except:
+        pass
+
+    # 点击领会员权益
+    TouchAction(driver).tap(x=526, y=1164).perform()
+    time.sleep(3)
+    # print(driver.contexts)
+
+    # 如果出现授权 
+    try:
+        # 点击同意
+        TouchAction(driver).tap(x=73, y=1298).perform()
+        time.sleep(0.2)
+        # 点击确定
+        TouchAction(driver).tap(x=500,y=980).perform()
+        time.sleep(1)
+    except:
+        pass
+
+    time.sleep(2)
+
+    get_screenshot(driver)
+
+    # ls = evaluate.main('./appium/3.gif')
+
+    # ls = main('./appium/2.gif')
+    # for i in ls:
+    #     x = int (i[1]*1319/1263) +126
+    #     y = 1580
+    #     TouchAction(driver).tap(x=x, y=y).perform()
+    #     time.sleep(0.5)
+    # TouchAction(driver).tap(x=724, y=1850).perform()
+
+    # 关闭 driver
+    driver.quit()
+
+
+# login_tencent()
+login_wps_vip()
+
+    
